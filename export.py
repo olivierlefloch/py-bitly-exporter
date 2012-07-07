@@ -91,7 +91,7 @@ def main(argv=None):
         
         if verbose:
             elapsed_seconds = time.time() - start_time
-            progress = offset / result_count
+            progress = float(offset) / result_count
             
             print "(%2d%%) Loaded %d/%d links. ETA: %ds remaining..." % (
                 round(progress * 100), offset, result_count, round(elapsed_seconds / progress)
