@@ -63,7 +63,7 @@ def main(argv=None):
     if login is None:
         raise Exception('Login parameter must be present.')
     
-    if parameter is None:
+    if password is None:
         raise Exception('Password parameter must be present.')
     
     bitly = Bitly(login, password, verbose)
