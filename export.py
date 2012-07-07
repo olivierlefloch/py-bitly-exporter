@@ -93,11 +93,13 @@ def main(argv=None):
             elapsed_seconds = time.time() - start_time
             progress = float(offset) / result_count
             
-            print "(%2d%%) Loaded %d/%d links. ETA: %ds remaining..." % (
+            sys.stdout.write("\r(%2d%%) Loaded %5d/%5d links. ETA: %ds remaining..." % (
                 round(progress * 100), offset, result_count, round(elapsed_seconds / progress)
-            )
+            ))
+            sys.stdout.flush()
     
     if verbose:
+        print ""
         print "Done! Found %d links, expected %d." % (len(results), result_count)
 
 class Bitly(object):
