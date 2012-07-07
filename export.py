@@ -2,6 +2,7 @@
 
 # Requires https://github.com/bitly/bitly-api-python
 
+import csv
 import getopt
 import requests
 import sys
@@ -28,8 +29,8 @@ def main(argv=None):
     try:
         opts, args = getopt.getopt(
             argv[1:],
-            "vhl:p:u:",
-            ["help", "login=", "password=", "user="]
+            "vhl:p:u:o:",
+            ["help", "login=", "password=", "user=", "output="]
         )
     except getopt.error, msg:
         print "Option parsing error: %s" % str(msg)
@@ -40,6 +41,7 @@ def main(argv=None):
     login = None
     password = None
     user = None
+    output_path = 'links.csv'
     
     try:
         for option, value in opts:
@@ -54,6 +56,8 @@ def main(argv=None):
                 password = value
             elif option in ("-u", "--user"):
                 user = value
+            elif option in ("-o", "--output"):
+                output_path = value
             else:
                 raise Exception('unknown option')
     except Exception, err:
@@ -72,8 +76,10 @@ def main(argv=None):
     limit = 100
     offset = 0
     result_count = 0
+    nb_found = 0
     
-    results = [('Link', 'Long url')]
+    csv_writer = csv.writer(open(output_path, 'wb'), quoting=csv.QUOTE_ALL)
+    csv_writer.writerow(('Link', 'Long url'))
     
     while offset <= result_count:
         data = bitly.user_link_history(limit=limit, offset=offset, user=user)
@@ -81,7 +87,9 @@ def main(argv=None):
         result_count = data['result_count']
         
         for link in data['link_history']:
-            results.append((link['link'], link['long_url']))
+            csv_writer.writerow((link['link'], link['long_url'].encode('utf8')))
+            
+            nb_found += 1
         
         offset += limit
         
@@ -95,7 +103,7 @@ def main(argv=None):
     
     if verbose:
         print ""
-        print "Done! Found %d links, expected %d." % (len(results), result_count)
+        print "Done! Found %d links, expected %d." % (nb_found, result_count)
 
 class Bitly(object):
     def __init__(self, login, password, verbose=False):
