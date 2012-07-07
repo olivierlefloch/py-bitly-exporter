@@ -124,14 +124,12 @@ class Bitly(object):
         
         http_response = requests.get(request, timeout=10)
         
-        if http_response['http_status_code'] != 200:
-            raise Exception('HTTP %d Error: %s' % (http_response['http_status_code'], http_response['result']))
-        if not http_response['result'].startswith('{'):
-            raise Exception('Unexpected response: %s' % http_response['result'])
+        if http_response.status_code != 200:
+            raise Exception('HTTP %d Error: %s' % (http_response.status_code, http_response.text))
         
-        data = json.loads(http_response['result'])
+        data = http_response.json
         
-        if data.get('status_code', 500) != 200:
+        if data is None or data.get('status_code', 500) != 200:
             raise Exception('Bitly returned error code %d: %s' % (data.get('status_code', 500), data.get('status_txt', 'UNKNOWN_ERROR')))
         
         return data
