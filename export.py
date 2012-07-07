@@ -73,7 +73,7 @@ def main(argv=None):
     offset = 0
     result_count = 0
     
-    while offset < result_count:
+    while offset <= result_count:
         data = bitly.user_link_history(limit=limit, offset=offset, user=user)
         
         result_count = data['result_count']
