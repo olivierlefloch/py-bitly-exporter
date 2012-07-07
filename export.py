@@ -68,7 +68,21 @@ def main(argv=None):
         raise Exception('Password parameter must be present.')
     
     bitly = Bitly(login, password, verbose)
-    print bitly.user_link_history(user=user)
+    
+    limit = 100
+    offset = 0
+    result_count = 0
+    
+    while offset < result_count:
+        data = bitly.user_link_history(limit=limit, offset=offset, user=user)
+        
+        result_count = data['result_count']
+        history      = data['link_history']
+        
+        for link in history:
+            print 'Link: %s, Long url: %s' % (link['link'], link['long_url'])
+        
+        offset += limit
 
 class Bitly(object):
     def __init__(self, login, password, verbose=False):
@@ -95,7 +109,7 @@ class Bitly(object):
         if user is not None:
             params['user'] = user
     
-        return self._call('v3/user/link_history', params)
+        return self._call('v3/user/link_history', params)['data']
 
     def _call(self, method, params):
         """
