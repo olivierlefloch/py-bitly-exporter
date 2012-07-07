@@ -6,6 +6,7 @@ import getopt
 import sys
 import urllib
 import requests
+import types
 
 def main(argv=None):
     """
