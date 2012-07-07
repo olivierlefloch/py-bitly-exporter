@@ -11,8 +11,8 @@ def __user_link_history(self, limit=50, offset=0, user=None):
     params = {
         'login': self.login,
         'apiKey': self.api_key,
-        'limit': limit,
-        'offset': offset,
+        'limit': str(limit),
+        'offset': str(offset),
         'archived': 'both'
     }
     
