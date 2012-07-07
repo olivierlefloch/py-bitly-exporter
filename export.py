@@ -4,24 +4,8 @@
 
 import getopt
 import sys
-from bitly_api import bitly_api
-
-# Monkey patch bitly_api to add user_link_history method
-def __user_link_history(self, limit=50, offset=0, user=None):
-    params = {
-        'login': self.login,
-        'apiKey': self.api_key,
-        'limit': str(limit),
-        'offset': str(offset),
-        'archived': 'both'
-    }
-    
-    if user is not None:
-        params['user'] = user
-    
-    return self._call(self.host, 'v3/user/link_history', params, self.secret)
-    
-bitly_api.Connection.user_link_history = __user_link_history
+import urllib
+import requests
 
 def main(argv=None):
     """
@@ -29,7 +13,7 @@ def main(argv=None):
     
     Required options:
         -l=, --login=: Bit.ly login
-        -k, --api_key=: Bit.ly (legacy) API Key
+        -p=, --password=: Bit.ly Password (used to generate OAuth token)
     
     Optional parameters:
         -v: Verbose mode
@@ -43,8 +27,8 @@ def main(argv=None):
     try:
         opts, args = getopt.getopt(
             argv[1:],
-            "vhl:k:u:",
-            ["help", "login=", "api_key=", "user="]
+            "vhl:p:u:",
+            ["help", "login=", "password=", "user="]
         )
     except getopt.error, msg:
         print "Option parsing error: %s" % str(msg)
@@ -53,7 +37,7 @@ def main(argv=None):
     # Setup defaults
     verbose = False
     login = None
-    api_key = None
+    password = None
     user = None
     
     try:
@@ -65,8 +49,8 @@ def main(argv=None):
                 return 0
             elif option in ("-l", "--login"):
                 login = value
-            elif option in ("-k", "--api_key"):
-                api_key = value
+            elif option in ("-p", "--password"):
+                password = value
             elif option in ("-u", "--user"):
                 user = value
             else:
@@ -79,11 +63,77 @@ def main(argv=None):
     if login is None:
         raise Exception('Login parameter must be present.')
     
-    if api_key is None:
-        raise Exception('API Key parameter must be present.')
+    if parameter is None:
+        raise Exception('Password parameter must be present.')
     
-    bitly = bitly_api.Connection(login, api_key)
-    print bitly.user_link_history(50, 0, user)
+    bitly = Bitly(login, password, verbose)
+    print bitly.user_link_history(user=user)
+
+class Bitly(object):
+    def __init__(self, login, password, verbose=False):
+        super(Bitly, self).__init__()
+        self.login = login
+        self.verbose = verbose
+        
+        self.access_token = requests.post(
+            'https://api-ssl.bitly.com/oauth/access_token',
+            auth=(login, password),
+            timeout=10
+        )
+        
+        if verbose:
+            print "Access token retrieved: %s" % self.access_token
+        
+    def user_link_history(self, limit=50, offset=0, user=None):
+        params = {
+            'limit': limit,
+            'offset': offset,
+            'archived': 'both'
+        }
+    
+        if user is not None:
+            params['user'] = user
+    
+        return self._call('v3/user/link_history', params)
+
+    def _call(self, method, params):
+        """
+        A good chunk of the following method has been extracted from
+        https://github.com/bitly/bitly-api-python
+        """
+        # default to json
+        params['format'] = params.get('format','json')
+        
+        params['access_token'] = self.access_token
+        
+        # force to utf8 to fix ascii codec errors
+        encoded_params = []
+        for k,v in params.items():
+            if type(v) in [types.ListType, types.TupleType]:
+                v = [e.encode('UTF8') for e in v]
+            else:
+                v = str(v).encode('UTF8')
+            encoded_params.append((k,v))
+        params = dict(encoded_params)
+        
+        request = "https://api-ssl.bitly.com/%(method)s?%(params)s" % {
+            'method': method,
+            'params': urllib.urlencode(params, doseq=True)
+        }
+        
+        http_response = requests.get(request, timeout=10)
+        
+        if http_response['http_status_code'] != 200:
+            raise Exception('HTTP %d Error: %s' % (http_response['http_status_code'], http_response['result']))
+        if not http_response['result'].startswith('{'):
+            raise Exception('Unexpected response: %s' % http_response['result'])
+        
+        data = json.loads(http_response['result'])
+        
+        if data.get('status_code', 500) != 200:
+            raise Exception('Bitly returned error code %d: %s' % (data.get('status_code', 500), data.get('status_txt', 'UNKNOWN_ERROR')))
+        
+        return data
 
 if __name__ == '__main__':
     sys.exit(main())
