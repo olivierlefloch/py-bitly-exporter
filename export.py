@@ -44,7 +44,7 @@ def main(argv=None):
         opts, args = getopt.getopt(
             argv[1:],
             "vhl:k:u:",
-            ["help", "login", "api_key", "user"]
+            ["help", "login=", "api_key=", "user="]
         )
     except getopt.error, msg:
         print "Option parsing error: %s" % str(msg)
