@@ -80,7 +80,7 @@ class Bitly(object):
             'https://api-ssl.bitly.com/oauth/access_token',
             auth=(login, password),
             timeout=10
-        )
+        ).text
         
         if verbose:
             print "Access token retrieved: %s" % self.access_token
