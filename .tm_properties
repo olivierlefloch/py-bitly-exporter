@@ -1,0 +1,8 @@
+# Textmate project configuration
+
+projectDirectory    = "$CWD"
+windowTitle         = "$TM_DISPLAYNAME — Py Bit.ly Exporter"
+
+# Code formatting settings
+
+softTabs = true
