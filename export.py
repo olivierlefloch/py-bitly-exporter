@@ -80,7 +80,8 @@ def main(argv=None):
         
         result_count = data['result_count']
         
-        results.append((link['link'], link['long_url'])) for link in data['link_history']
+        for link in data['link_history']:
+            results.append((link['link'], link['long_url']))
         
         if verbose:
             print >> sys.stdout, "\r(%2d%%) Loaded %d/%d links..." % (round(offset / result_count * 100), offset, result_count),
