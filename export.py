@@ -5,7 +5,6 @@
 import getopt
 import requests
 import sys
-import time
 import types
 import urllib
 
@@ -76,9 +75,6 @@ def main(argv=None):
     
     results = [('Link', 'Long url')]
     
-    if verbose:
-        start_time = time.time()
-    
     while offset <= result_count:
         data = bitly.user_link_history(limit=limit, offset=offset, user=user)
         
@@ -90,11 +86,10 @@ def main(argv=None):
         offset += limit
         
         if verbose:
-            elapsed_seconds = time.time() - start_time
             progress = float(offset) / result_count
             
-            sys.stdout.write("\r(%2d%%) Loaded %5d/%5d links. ETA: %ds remaining..." % (
-                round(progress * 100), offset, result_count, round(elapsed_seconds / progress)
+            sys.stdout.write("\r(%2d%%) Loaded %5d/%5d links..." % (
+                round(progress * 100), offset, result_count
             ))
             sys.stdout.flush()
     
