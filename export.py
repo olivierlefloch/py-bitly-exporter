@@ -9,8 +9,8 @@ from bitly_api import bitly_api
 # Monkey patch bitly_api to add user_link_history method
 def __user_link_history(self, limit=50, offset=0, user=None):
     params = {
-        'login': bitly.login,
-        'apiKey': bitly.api_key,
+        'login': self.login,
+        'apiKey': self.api_key,
         'limit': limit,
         'offset': offset,
         'archived': 'both'
