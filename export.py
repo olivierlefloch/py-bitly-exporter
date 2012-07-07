@@ -85,6 +85,7 @@ def main(argv=None):
         
         if verbose:
             print >> sys.stdout, "\r(%2d%%) Loaded %d/%d links..." % (round(offset / result_count * 100), offset, result_count),
+            sys.stdout.flush()
         
         offset += limit
     
