@@ -73,16 +73,22 @@ def main(argv=None):
     offset = 0
     result_count = 0
     
+    results = [('Link', 'Long url')]
+    
     while offset <= result_count:
         data = bitly.user_link_history(limit=limit, offset=offset, user=user)
         
         result_count = data['result_count']
-        history      = data['link_history']
         
-        for link in history:
-            print 'Link: %s, Long url: %s' % (link['link'], link['long_url'])
+        results.append((link['link'], link['long_url'])) for link in data['link_history']
+        
+        if verbose:
+            print >> sys.stdout, "\r(%2d%%) Loaded %d/%d links..." % (round(offset / result_count * 100), offset, result_count),
         
         offset += limit
+    
+    if verbose:
+        print "Done! Found %d links, expected %d." % (len(results), result_count)
 
 class Bitly(object):
     def __init__(self, login, password, verbose=False):
