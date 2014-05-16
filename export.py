@@ -162,7 +162,7 @@ class Bitly(object):
         if http_response.status_code != 200:
             raise Exception('HTTP %d Error: %s' % (http_response.status_code, http_response.text))
         
-        data = http_response.json
+        data = http_response.json()
         
         if data is None or data.get('status_code', 500) != 200:
             raise Exception('Bitly returned error code %d: %s' % (data.get('status_code', 500), data.get('status_txt', 'UNKNOWN_ERROR')))
