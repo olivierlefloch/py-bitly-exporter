@@ -17,8 +17,8 @@ def main(argv=None):
     links (e.g. http://bit.ly/py-bitly-exporter)
 
     Required options:
-        -l=, --login=: Bit.ly login
-        -p=, --password=: Bit.ly Password (used to generate OAuth token)
+        -l, --login=: Bit.ly login
+        -p, --password=: Bit.ly Password (used to generate OAuth token)
 
     Optional parameters:
         -v: Verbose mode
