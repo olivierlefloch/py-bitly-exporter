@@ -8,13 +8,13 @@ import requests
 import sys
 import types
 import urllib
+import datetime
 
 def main(argv=None):
     """
     This script exports all Bit.ly urls for an account.
-    For each url it extracts the Bit.ly 'link' which uses the hash Bit.ly generates (e.g. http://bit.ly/1dfPmzu) and,
-    if it exists, the Bit.ly 'keyword_link' which is the custom hash that can be applied to
-    links (e.g. http://bit.ly/py-bitly-exporter)
+    For each url it extracts the Bit.ly 'link' which uses the hash Bit.ly generates (e.g. http://bit.ly/1dfPmzu), 'title' and
+    'created_at'
 
     Required options:
         -l, --login=: Bit.ly login
@@ -82,7 +82,7 @@ def main(argv=None):
     nb_found = 0
 
     csv_writer = csv.writer(open(output_path, 'wb'), quoting=csv.QUOTE_ALL)
-    csv_writer.writerow(('Link', 'Keywork link', 'Long url'))
+    csv_writer.writerow(('Link', 'Title', 'Long url', 'created'))
 
     while offset <= result_count:
         data = bitly.user_link_history(limit=limit, offset=offset, user=user)
@@ -90,10 +90,12 @@ def main(argv=None):
         result_count = data['result_count']
 
         for link in data['link_history']:
+            link_datetime = datetime.datetime.utcfromtimestamp(link['created_at'])
 
             csv_writer.writerow((link['link'],
-                link.get('keyword_link', '').encode('utf8'),
-                link['long_url'].encode('utf8')))
+                link.get('title', '').encode('utf8'),
+                link['long_url'].encode('utf8'),
+                link_datetime))
 
             nb_found += 1
 
